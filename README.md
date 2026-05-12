@@ -3,7 +3,7 @@
 itch.io에는 완성 이후 출시할 예정이니 많은 관심 부탁드립니다!<br>
 <br>
 플레이 링크:
-  https://onlymathmouse.github.io/the-South/
+  https://twmbnpb.github.io/the-South/
 <br>
 <The North's panda> Come back!<br>
 오래 기다리셨습니다.<br>
