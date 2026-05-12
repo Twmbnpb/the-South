@@ -90,10 +90,12 @@ document.body.style.width = `${bodyW}px`;
 document.body.style.height = `${bodyH}px`;
 let EntityList = []
 let ItemList = []
+let EnemyList = []
 let mouseX = 0;
 let mouseY = 0;
 let count = 0;
 let countItem = 0;
+let countEnemy = 0;
 let items = {
     gold: 0,
     diamond: 0,
@@ -325,6 +327,89 @@ class Entity{
         _save(`${this.object.id}-power`, this.data.power)
     }
 }
+class Enemy{
+    data = {
+        hp: 100,
+        exp: 0,
+        nowState: entityState.Idle,
+        selected: false,
+        power: 1
+    }
+    object = null;
+    /**
+     * @param {number} exp 
+     * @param {number} hp 
+     * @param {number} power 
+     * @param {entityState} nowS 
+     * @param {number} x 
+     * @param {number} y 
+     */
+    constructor( exp, hp, power, nowS, x, y){
+        this.data.selected = false;
+        this.data.nowState = nowS;
+        this.object = document.createElement("div");
+        this.object.className = "Entity Layer-Object";
+        this.object.style.top = `${y}vh`
+        this.object.style.left = `${x}vw`
+        this.object.id = `Enemy v${count}`
+        this.data.hp = hp;
+        this.data.power = power
+        if (hp < 0){
+            this.data.nowState = entityState.Die;
+        }
+        this.data.exp = exp;
+        EnemyList.push(this)
+        document.body.appendChild(this.object)
+        countEnemy++;
+    }
+    /**매 프레임 실행하시오 */
+    Update() {
+        if (this.data.nowState == entityState.Die){
+            this.object.style.backgroundColor = 'darkred';
+            return;
+        }
+        if (this.data.hp < 0){
+            this.data.nowState = entityState.Die;
+            setTimeOut(() => this.Destroy(), 1000)
+            return;
+        }
+        if (this.data.selected && this.data.nowState != entityState.Work){
+            this.data.nowState = entityState.Move
+        }else if (this.data.nowState != entityState.Work){
+            this.data.nowState = entityState.Idle
+        }
+        switch (this.data.nowState){
+            case entityState.Attack:
+                this.object.style.border = "0.25vw solid red"
+                break;
+            case entityState.Die:
+                this.object.style.border = "0.25vw solid purple"
+                break;
+            case entityState.Idle:
+                this.object.style.border = "0vw solid white"
+                break;
+            case entityState.Move:
+                this.object.style.border = "0.25vw solid green"
+                break;
+            case entityState.Work:
+                this.object.style.border = "0.25vw solid orange"
+                break;
+        }
+    }
+    Destroy(){
+        EntityList.splice(EntityList.indexOf(this))
+        this.object.remove()
+        delete this;
+    }
+    Save(){
+        _save(`${this.object.id}-x`, this.object.style.left.replace("vw",""))
+        _save(`${this.object.id}-y`, this.object.style.top.replace("vh",""))
+        _save(`${this.object.id}-state`, this.data.nowState)
+        _save(`${this.object.id}-exp`, this.data.exp)
+        _save(`${this.object.id}-hp`, this.data.hp)
+        _save(`${this.object.id}-power`, this.data.power)
+    }
+}
 document.addEventListener("mousedown", (event) => {
     switch (event.button){
         case 0:
@@ -496,6 +581,12 @@ function startGame(isFirst = false){
             new Entity(Number(_load(`Entity v${count}-level`)), Number(_load(`Entity v${count}-exp`)), Number( _load(`Entity v${count}-hp`)), Number( _load(`Entity v${count}-power`)), 
                 _load(`Entity v${count}-state`), _load(`Entity v${count}-x`), _load(`Entity v${count}-y`))
         }
+        let EnemyCount = _load("EnemyCount")
+        count = 0
+        for (let i = 0; i < EnemyCount; i++){
+            new Enemy(Number(_load(`Enemy v${count}-exp`)), Number( _load(`Enemy v${count}-hp`)), Number( _load(`Enemy v${count}-power`)), 
+                _load(`Enemy v${count}-state`), _load(`Enemy v${count}-x`), _load(`Enemy v${count}-y`))
+        }
         nowStateInGame = _load("GameState")
         items.gold = _load("gold")
         items.diamond = _load("diamond")
@@ -570,7 +661,14 @@ function Save(){
         element.Save()
         c++
     });
+    let c = 0;
+    EnemyList.forEach(element => {
+        element.object.id = `Enemy v${c}`
+        element.Save()
+        c++
+    });
     _save("EntityCount", EntityList.length)
+    _save("EnemyCount", Enemy.length)
     _save("GameState", nowStateInGame)
     _save("gold", items.gold)
     _save("diamond", items.diamond)
