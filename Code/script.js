@@ -601,6 +601,9 @@ function startGame(isFirst = false){
     setInterval(() => {
         createItem()
     }, 10000)
+    setInterval(() => {
+        createEnemy()
+    }, 10000)
 }
 function createItem(){
     if (ItemList.length > 10) return;
@@ -621,6 +624,14 @@ function createItem(){
         case 4:
             new Item(itemsKind.iron);
             break;
+    }
+}
+function createEnemy(){
+    try{
+        new Enemy(/*여기부터 다시 코딩하시길! 지금은 작동 안함*/)
+    }
+    catch(e){
+        return
     }
 }
 function Tutorial(){
