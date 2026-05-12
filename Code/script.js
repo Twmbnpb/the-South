@@ -661,7 +661,7 @@ function Save(){
         element.Save()
         c++
     });
-    let c = 0;
+    c = 0;
     EnemyList.forEach(element => {
         element.object.id = `Enemy v${c}`
         element.Save()
